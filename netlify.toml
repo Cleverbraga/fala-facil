@@ -1,0 +1,9 @@
+[build]
+  # Define a pasta onde está o seu front-end (ponto significa a raiz atual)
+  publish = "."
+
+[functions]
+  # Avisa à Netlify onde estão as suas funções
+  directory = "netlify/functions"
+  # Define o formato moderno do Node (ES Modules) para aceitar o "import" no código
+  node_version = "20"
