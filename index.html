@@ -165,7 +165,38 @@
     .pat-bar{height:100%;border-radius:99px;transition:width .6s var(--spring)}
     .pat-n{font-size:13px;font-weight:800;min-width:18px;text-align:right}
     #btn-limpar{width:100%;margin-top:16px;padding:12px;background:transparent;border:1.5px solid var(--border);border-radius:var(--r-full);font-family:var(--font);font-size:13px;font-weight:700;color:var(--text-mid);cursor:pointer;min-height:44px;transition:background var(--dur-f)}
-    #btn-limpar:hover{background:var(--bg)}
+#btn-limpar:hover{background:var(--bg)}
+
+    .insight-section{margin-top:20px}
+    .insight-section-title{font-size:13px;font-weight:700;color:var(--text-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
+    .insight-card{background:#F5F0FF;border:1px solid #E0D5FF;border-radius:16px;padding:16px;position:relative;margin-bottom:10px}
+    .insight-tag{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;color:#7C5CBF;background:#EDE5FF;padding:3px 8px;border-radius:99px;cursor:help}
+    .insight-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+    .insight-icon{font-size:20px;line-height:1;flex-shrink:0;margin-top:2px}
+    .insight-title{font-size:14px;font-weight:800;color:#3D2B6B;letter-spacing:-.2px}
+    .insight-body{font-size:13px;color:#555;line-height:1.6;margin-bottom:10px}
+    .insight-sugg{background:rgba(255,255,255,.7);border-left:3px solid #A78BFA;border-radius:0 8px 8px 0;padding:8px 12px;font-size:12px;color:#4A3B7A;font-weight:500;line-height:1.55;margin-bottom:12px}
+    .insight-link{font-size:12px;font-weight:700;color:#6C5CE7;cursor:pointer;display:inline-flex;align-items:center;gap:4px;text-decoration:none;border:none;background:transparent;font-family:var(--font);padding:0}
+    .insight-link:hover{text-decoration:underline}
+    .insight-chart{margin:12px 0 4px}
+    .chart-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+    .chart-label{font-size:11px;font-weight:600;color:#6B6B6B;width:80px;flex-shrink:0}
+    .chart-bar-bg{flex:1;height:8px;background:rgba(0,0,0,.06);border-radius:99px;overflow:hidden}
+    .chart-bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+    .chart-val{font-size:11px;font-weight:700;color:#6B6B6B;width:20px;text-align:right;flex-shrink:0}
+    /* Modal detalhes */
+    #modal-insights{position:fixed;inset:0;z-index:300;display:flex;align-items:flex-end;background:rgba(0,0,0,0);pointer-events:none;transition:background var(--dur-m)}
+    #modal-insights.show{background:rgba(0,0,0,.42);pointer-events:all}
+    #modal-insights.show .panel-sheet{transform:translateY(0)}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+    .detail-card{background:var(--bg);border-radius:12px;padding:12px;text-align:center}
+    .detail-num{font-size:24px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
+    .detail-lbl{font-size:11px;color:var(--text-mid);font-weight:600;margin-top:2px}
+    .recom-item{display:flex;gap:10px;padding:10px 0;border-bottom:.5px solid var(--border)}
+    .recom-item:last-child{border-bottom:none}
+    .recom-dot{width:8px;height:8px;border-radius:50%;background:var(--brand);flex-shrink:0;margin-top:5px}
+    .recom-txt{font-size:13px;color:var(--text);line-height:1.55;font-weight:500}
+
     /* FORMULÁRIO */
     .photo-wrap{width:90px;height:90px;border-radius:50%;border:2px dashed var(--border-mid);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;margin:0 auto 20px;overflow:hidden;background:var(--bg)}
     .photo-wrap span{font-size:11px;font-weight:700;color:var(--text-mid)}
@@ -445,6 +476,19 @@
   </div>
 </div>
 
+
+<div id="modal-insights" onclick="fecharInsights(event)" role="dialog" aria-modal="true" aria-label="Detalhes dos padrões">
+  <div class="panel-sheet">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h2 class="sheet-title">Análise detalhada</h2>
+    <p class="sheet-sub">Padrões identificados hoje</p>
+    <div class="detail-grid" id="detail-grid"></div>
+    <div style="font-size:13px;font-weight:700;color:var(--text-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px">Recomendações</div>
+    <div id="detail-recom"></div>
+    <p style="font-size:11px;color:var(--text-light);line-height:1.5;margin-top:16px;padding:10px 12px;background:var(--bg);border-radius:10px">⚠️ Esses padrões são sugestões baseadas no uso do app e não substituem orientação profissional.</p>
+  </div>
+</div>
+
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <div id="tts-warn" role="alert">🔇 Voz não disponível neste dispositivo</div>
 
@@ -558,7 +602,109 @@ function fecharCalma(){document.getElementById('modo-calma').classList.remove('s
 
 /* HISTÓRICO */
 function registar(card){if(!hist[card.l])hist[card.l]={count:0,c:card.c,e:card.e,photo:card.photo||null};hist[card.l].count++;const el=document.querySelector(`[data-label="${card.l}"] .card-count`);if(el){const n=hist[card.l].count;el.textContent=n>1?'×'+n:'';el.classList.toggle('used',n>0);}document.getElementById('badge').classList.add('show');}
-function abrirPadroes(){FA.track(FA.E.PADROES);const lista=document.getElementById('lista-padroes'),ord=Object.entries(hist).sort((a,b)=>b[1].count-a[1].count);if(!ord.length){lista.innerHTML='<div style="text-align:center;padding:32px 0;color:#ABABAB;font-size:14px;font-weight:600">Nenhum cartão usado ainda.</div>';}else{const max=ord[0][1].count;lista.innerHTML=ord.map(([lbl,d])=>{const cfg=CAT[d.c]||CAT.custom,pct=Math.round((d.count/max)*100),media=d.photo?`<img class="pat-ph" src="${d.photo}" alt="${lbl}"/>`:`<span class="pat-em" aria-hidden="true">${d.e}</span>`;return `<div class="pattern-row" role="listitem">${media}<div class="pat-info"><div class="pat-name">${lbl}</div><div class="pat-cat">${cfg.label}</div></div><div class="pat-bar-wrap"><div class="pat-bar" style="width:${pct}%;background:${cfg.color}"></div></div><span class="pat-n">${d.count}</span></div>`;}).join('');}document.getElementById('panel-padroes').classList.add('show');trapFocus('panel-padroes');}
+
+function gerarInsights(ord) {
+  const total = ord.reduce((s,[,d])=>s+d.count,0);
+  if (!total) return '';
+
+  // Contagem por categoria
+  const cats = {};
+  ord.forEach(([lbl,d])=>{ cats[d.c]=(cats[d.c]||0)+d.count; });
+  const topCats = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
+
+  // Escolhe insight baseado no padrão predominante
+  let icon='🔍', title='', body='', sugg='';
+  const labels = ord.map(([l])=>l);
+  const temRaiva = labels.some(l=>l==='Com raiva');
+  const temCasa  = labels.some(l=>l==='Ir para casa');
+  const temAvó   = labels.some(l=>l==='Avó'||l==='Avô');
+  const qtdEmoc  = ord.filter(([,d])=>d.c==='emocao').reduce((s,[,d])=>s+d.count,0);
+
+  if (temRaiva && ord.find(([l])=>l==='Com raiva')?.[1].count >= 3) {
+    icon='⚡'; title='Emoção intensa recorrente';
+    body=`"Com raiva" apareceu ${ord.find(([l])=>l==='Com raiva')[1].count}× hoje. Pode indicar frustração acumulada ou necessidade não atendida.`;
+    sugg='Considere verificar se houve mudança de rotina ou excesso de estímulos sensoriais no período.';
+  } else if (temCasa && temAvó) {
+    icon='🏡'; title='Desejo de segurança';
+    body='"Ir para casa" e cartões de pessoas próximas foram selecionados em sequência. Vale observar se o ambiente atual está gerando desconforto.';
+    sugg='Uma pausa em local familiar e tranquilo pode ajudar a regular as emoções.';
+  } else if (qtdEmoc / Math.max(total,1) > 0.5) {
+    icon='💜'; title='Expressão emocional elevada';
+    body=`Mais de ${Math.round(qtdEmoc/total*100)}% dos cartões usados hoje foram de emoções. Pode sugerir um dia de maior intensidade emocional.`;
+    sugg='Atividades calmas e previsíveis costumam ajudar em momentos assim. O Modo Calma do app pode ser útil.';
+  } else {
+    icon='✨'; title='Comunicação ativa';
+    body=`Foram usados ${total} cartão${total>1?'s':''} hoje em ${ord.length} categorias. Vale observar os horários de maior uso para identificar padrões.`;
+    sugg='Continue registrando o uso. Com mais dados, os padrões ficam mais claros.';
+  }
+
+  // Mini gráfico das top 3 categorias
+  const catNames = {necessidade:'Necessidades',emocao:'Emoções',atividade:'Atividades',lugar:'Lugares',pessoa:'Pessoas',custom:'Personaliz.'};
+  const catColors = {necessidade:'#E8610A',emocao:'#7C4DFF',atividade:'#0F9D6A',lugar:'#1A73E8',pessoa:'#D4367A',custom:'#B8860B'};
+  const maxCat = topCats[0]?.[1]||1;
+  const chartHtml = topCats.map(([cat,n])=>`
+    <div class="chart-row">
+      <span class="chart-label">${catNames[cat]||cat}</span>
+      <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${Math.round(n/maxCat*100)}%;background:${catColors[cat]||'#6C5CE7'}"></div></div>
+      <span class="chart-val">${n}</span>
+    </div>`).join('');
+
+  return `
+    <div class="insight-section" aria-label="Padrões identificados">
+      <div class="insight-section-title">Padrões identificados</div>
+      <div class="insight-card" role="region" aria-label="${title}">
+        <span class="insight-tag" title="Sugestões baseadas no uso do app — não substituem orientação profissional">Insight preliminar</span>
+        <div class="insight-head">
+          <span class="insight-icon" aria-hidden="true">${icon}</span>
+          <div class="insight-title">${title}</div>
+        </div>
+        <div class="insight-body">${body}</div>
+        <div class="insight-sugg">💡 ${sugg}</div>
+        <div class="insight-chart" aria-label="Gráfico de categorias">${chartHtml}</div>
+        <button class="insight-link" onclick="abrirDetalhes()" aria-label="Ver análise detalhada">
+          Ver mais detalhes →
+        </button>
+      </div>
+    </div>`;
+}
+
+function abrirDetalhes() {
+  const ord = Object.entries(hist).sort((a,b)=>b[1].count-a[1].count);
+  const total = ord.reduce((s,[,d])=>s+d.count,0);
+  const qtdEmoc = ord.filter(([,d])=>d.c==='emocao').reduce((s,[,d])=>s+d.count,0);
+  const topCat  = ord[0] ? (CAT[ord[0][1].c]?.label||'—') : '—';
+
+  document.getElementById('detail-grid').innerHTML = `
+    <div class="detail-card"><div class="detail-num">${total}</div><div class="detail-lbl">Toques hoje</div></div>
+    <div class="detail-card"><div class="detail-num">${ord.length}</div><div class="detail-lbl">Cartões únicos</div></div>
+    <div class="detail-card"><div class="detail-num">${qtdEmoc}</div><div class="detail-lbl">Emocionais</div></div>
+    <div class="detail-card"><div class="detail-num" style="font-size:14px">${topCat}</div><div class="detail-lbl">Categoria top</div></div>
+  `;
+
+  const recomendacoes = [
+    'Observe o horário de maior uso — pode coincidir com momentos de transição ou cansaço.',
+    'Cartões emocionais frequentes podem indicar necessidade de mais suporte regulatório.',
+    'Compartilhe o histórico com o terapeuta ou escola para enriquecer o acompanhamento.',
+    'Cartões repetidos em sequência costumam ter significado — vale anotar o contexto.',
+  ];
+
+  document.getElementById('detail-recom').innerHTML = recomendacoes.map(r=>`
+    <div class="recom-item"><div class="recom-dot" aria-hidden="true"></div><div class="recom-txt">${r}</div></div>`).join('');
+
+  document.getElementById('modal-insights').classList.add('show');
+  trapFocus('modal-insights');
+}
+
+function fecharInsights(e) {
+  if (e.target===document.getElementById('modal-insights'))
+    document.getElementById('modal-insights').classList.remove('show');
+}
+
+function abrirPadroes(){FA.track(FA.E.PADROES);const lista=document.getElementById('lista-padroes'),ord=Object.entries(hist).sort((a,b)=>b[1].count-a[1].count);if(!ord.length){lista.innerHTML='<div style="text-align:center;padding:32px 0;color:#ABABAB;font-size:14px;font-weight:600">Nenhum cartão usado ainda.</div>';}else{const max=ord[0][1].count;lista.innerHTML=ord.map(([lbl,d])=>{const cfg=CAT[d.c]||CAT.custom,pct=Math.round((d.count/max)*100),media=d.photo?`<img class="pat-ph" src="${d.photo}" alt="${lbl}"/>`:`<span class="pat-em" aria-hidden="true">${d.e}</span>`;return `<div class="pattern-row" role="listitem">${media}<div class="pat-info"><div class="pat-name">${lbl}</div><div class="pat-cat">${cfg.label}</div></div><div class="pat-bar-wrap"><div class="pat-bar" style="width:${pct}%;background:${cfg.color}"></div></div><span class="pat-n">${d.count}</span></div>`;}).join('');}const insightsHtml = gerarInsights(ord);
+  let insightsEl = document.getElementById('insights-section-wrap');
+  if (!insightsEl) { insightsEl = document.createElement('div'); insightsEl.id='insights-section-wrap'; document.getElementById('btn-limpar').before(insightsEl); }
+  insightsEl.innerHTML = insightsHtml;
+  document.getElementById('panel-padroes').classList.add('show');trapFocus('panel-padroes');}
 function fecharPadroes(e){if(e.target===document.getElementById('panel-padroes'))document.getElementById('panel-padroes').classList.remove('show');}
 function limparHistorico(){FA.track(FA.E.CLEAR,{total:Object.keys(hist).length});Object.keys(hist).forEach(k=>delete hist[k]);document.getElementById('badge').classList.remove('show');const cat=document.querySelector('.cat-btn.active').dataset.cat,t=todos();renderizar(cat==='todas'?t:t.filter(c=>c.c===cat));document.getElementById('panel-padroes').classList.remove('show');mostrarToast('Histórico apagado.');}
 
@@ -576,14 +722,14 @@ function tentarFS(){const el=document.getElementById('overlay'),req=el.requestFu
 function verificarTTS(){if(!('speechSynthesis' in window)){document.getElementById('tts-warn').classList.add('show');FA.track(FA.E.TTS_FAIL);}}
 
 /* TECLADO */
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharOverlay();fecharCalma();['panel-padroes','modal-custom'].forEach(id=>document.getElementById(id).classList.remove('show'));}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharOverlay();fecharCalma();['panel-padroes','modal-custom','modal-insights'].forEach(id=>document.getElementById(id).classList.remove('show'));}});
 
 
 
 let mutado = false;
 function toggleMute() {
   mutado = !mutado;
-  if (capaGain) capaGain.gain.value = mutado ? 0 : 0.18;
+  if (capaGain) capaGain.gain.value = mutado ? 0 : 0.45;
   document.getElementById('capa-mute-icon').className = mutado ? 'ti ti-volume-off' : 'ti ti-volume';
   document.getElementById('capa-mute-btn').setAttribute('aria-label', mutado ? 'Ativar música' : 'Silenciar música');
 }
@@ -602,7 +748,7 @@ function tocarMusicaCapa() {
     capaGain.gain.value = 0;
     capaGain.connect(capaAudioCtx.destination);
     // Fade in suave
-    capaGain.gain.linearRampToValueAtTime(0.18, capaAudioCtx.currentTime + 2);
+    capaGain.gain.linearRampToValueAtTime(0.45, capaAudioCtx.currentTime + 0.3);
     capaPlaying = true;
 
     // Melodia pentatônica — 8 notas simples e repetitivas (Mi, Sol, Lá, Si, Re)
@@ -648,10 +794,15 @@ function pararMusicaCapa() {
 FA.track(FA.E.OPEN);
 verificarTTS();
 
-document.getElementById('tela-capa').addEventListener('pointerdown', function handler() {
-  tocarMusicaCapa();
-  this.removeEventListener('pointerdown', handler);
-}, {once: true});
+(function(){
+  const attempt = () => tocarMusicaCapa();
+  // Tenta imediatamente (funciona em ambientes que permitem autoplay)
+  attempt();
+  // Fallback: primeiro toque caso autoplay seja bloqueado
+  document.getElementById('tela-capa').addEventListener('pointerdown', function h(){
+    tocarMusicaCapa(); this.removeEventListener('pointerdown', h);
+  }, {once:true});
+})();
 
 </script>
 </body>
