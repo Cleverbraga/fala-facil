@@ -135,7 +135,7 @@
     #btn-fechar:hover{opacity:.88}
     #btn-fechar:active{transform:scale(.97)}
     /* MODO CALMA */
-    #modo-calma{position:fixed;inset:0;z-index:200;background:#0D1B2A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;opacity:0;pointer-events:none;transition:opacity .6s var(--ease)}
+    #modo-calma{position:fixed;inset:0;z-index:200;background:#0D1B2A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;opacity:0;pointer-events:none;transition:opacity 1.2s var(--ease)}
     #modo-calma.show{opacity:1;pointer-events:all}
     .calma-lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35)}
     .breath-wrap{position:relative;width:180px;height:180px;display:flex;align-items:center;justify-content:center}
@@ -166,6 +166,44 @@
     .pat-n{font-size:13px;font-weight:800;min-width:18px;text-align:right}
     #btn-limpar{width:100%;margin-top:16px;padding:12px;background:transparent;border:1.5px solid var(--border);border-radius:var(--r-full);font-family:var(--font);font-size:13px;font-weight:700;color:var(--text-mid);cursor:pointer;min-height:44px;transition:background var(--dur-f)}
 #btn-limpar:hover{background:var(--bg)}
+    #btn-limpar{color:var(--danger);border-color:rgba(192,57,43,.25)}
+    #snackbar-undo{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A1A;color:white;padding:11px 16px 11px 20px;border-radius:var(--r-full);font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:1001;display:flex;align-items:center;gap:12px;white-space:nowrap;box-shadow:var(--sh-lg)}
+    #snackbar-undo.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:all}
+    #snackbar-undo button{background:var(--brand);color:white;border:none;border-radius:var(--r-full);padding:5px 12px;font-family:var(--font);font-size:12px;font-weight:800;cursor:pointer}
+
+
+    #calma-aviso{position:fixed;inset:0;z-index:195;background:var(--brand-light);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0;pointer-events:none;transition:opacity .4s}
+    #calma-aviso.show{opacity:1;pointer-events:all}
+    .calma-aviso-emoji{font-size:56px}
+    .calma-aviso-title{font-size:22px;font-weight:800;color:var(--brand);letter-spacing:-.4px;text-align:center}
+    .calma-aviso-sub{font-size:15px;color:var(--text-mid);text-align:center;max-width:240px;line-height:1.5}
+    .calma-aviso-counter{font-size:36px;font-weight:800;color:var(--brand)}
+    #btn-voltar-calma{padding:12px 28px;border-radius:var(--r-full);border:1.5px solid var(--border-mid);background:transparent;font-family:var(--font);font-size:13px;font-weight:700;color:var(--text-mid);cursor:pointer;min-height:44px}
+
+    .onboard-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
+    .onboard-overlay.show{opacity:1;pointer-events:all}
+    .onboard-sheet{background:white;border-radius:var(--r-xl) var(--r-xl) 0 0;padding:28px 24px max(40px,env(safe-area-inset-bottom));width:100%;transform:translateY(100%);transition:transform var(--dur-s) cubic-bezier(.32,.72,0,1)}
+    .onboard-overlay.show .onboard-sheet{transform:translateY(0)}
+    .onboard-step-dots{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+    .onboard-dot{width:7px;height:7px;border-radius:50%;background:var(--border-mid);transition:background .2s,width .2s}
+    .onboard-dot.active{width:20px;background:var(--brand);border-radius:99px}
+    .onboard-icon{font-size:48px;text-align:center;margin-bottom:12px}
+    .onboard-title{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.4px;text-align:center;margin-bottom:8px}
+    .onboard-body{font-size:14px;color:var(--text-mid);line-height:1.6;text-align:center;margin-bottom:24px;max-width:280px;margin-left:auto;margin-right:auto}
+    .onboard-btn{width:100%;padding:15px;background:var(--brand);color:white;border:none;border-radius:var(--r-full);font-family:var(--font);font-size:16px;font-weight:800;cursor:pointer;min-height:44px;margin-bottom:10px;box-shadow:0 4px 14px rgba(108,92,231,.35)}
+    .onboard-skip{width:100%;padding:10px;background:transparent;border:none;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-mid);cursor:pointer}
+    .help-btn{width:32px;height:32px;border-radius:50%;background:var(--surface-in);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;font-weight:800;color:var(--text-mid);font-family:var(--font);flex-shrink:0;transition:background var(--dur-f)}
+    .help-btn:hover{background:var(--brand-light);color:var(--brand)}
+
+    .modal-confirm{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity var(--dur-m);padding:24px}
+    .modal-confirm.show{opacity:1;pointer-events:all}
+    .modal-confirm-box{background:white;border-radius:var(--r-xl);padding:24px;max-width:320px;width:100%;box-shadow:var(--sh-lg)}
+    .modal-confirm-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:8px;letter-spacing:-.3px}
+    .modal-confirm-body{font-size:14px;color:var(--text-mid);line-height:1.55;margin-bottom:20px}
+    .modal-confirm-btns{display:flex;gap:8px}
+    .modal-confirm-btns button{flex:1;padding:12px;border-radius:var(--r-full);font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;min-height:44px}
+    .btn-cancel-conf{background:var(--surface-in);color:var(--text);border:none}
+    .btn-ok-conf{background:var(--danger);color:white;border:none;box-shadow:0 4px 12px rgba(192,57,43,.3)}
 
     .insight-section{margin-top:20px}
     .insight-section-title{font-size:13px;font-weight:700;color:var(--text-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px}
@@ -412,6 +450,7 @@
         <div class="brand-logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <span class="brand-name">Fala Fácil</span>
       </div>
+      <button class="help-btn" onclick="abrirOnboard()" aria-label="Ajuda e instruções">?</button>
       <div class="header-mascot" id="header-mascot" role="button" tabindex="0" aria-label="Abrir modo calma" onclick="pularParaCalma()" onkeydown="if(event.key==='Enter')pularParaCalma()"></div>
     </header>
     <div class="greeting"><div class="greeting-hi">Olá!</div><div class="greeting-q" id="greeting-q">O que você precisa?</div></div>
@@ -476,6 +515,7 @@
   <div id="breath-text" aria-live="polite">Inspira...</div>
   <div class="calma-dica"><div class="calma-dica-lbl">Para os pais</div><div class="calma-dica-txt">Fique por perto em silêncio. Presença sem perguntas é mais reguladora.</div></div>
   <button id="btn-sair-calma" onclick="fecharCalma()">Já estou melhor ✓</button>
+  <button style="padding:10px 24px;border-radius:var(--r-full);border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.5);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;min-height:44px;margin-top:-8px" onclick="fecharCalma()" aria-label="Voltar aos cartões">Voltar aos cartões</button>
 </div>
 
 <div id="panel-padroes" onclick="fecharPadroes(event)" role="dialog" aria-modal="true" aria-label="Histórico">
@@ -524,6 +564,45 @@
       <button class="report-btn secondary" onclick="enviarTerapeuta()" aria-label="Enviar para terapeuta">
         👩‍⚕️ Enviar para terapeuta
       </button>
+    </div>
+  </div>
+</div>
+
+<div id="calma-aviso" role="status" aria-live="polite" aria-label="Preparando modo calma">
+  <div class="calma-aviso-emoji" aria-hidden="true">🌙</div>
+  <div class="calma-aviso-title">Vamos respirar juntos?</div>
+  <div class="calma-aviso-sub">Em alguns segundos vamos entrar no Modo Calma</div>
+  <div class="calma-aviso-counter" id="calma-countdown" aria-live="polite">3</div>
+  <button id="btn-voltar-calma" onclick="cancelarModoCalma()" aria-label="Cancelar e voltar aos cartões">Agora não</button>
+</div>
+
+<div id="onboard-overlay" class="onboard-overlay" role="dialog" aria-modal="true" aria-label="Bem-vindo ao Fala Fácil">
+  <div class="onboard-sheet">
+    <div class="onboard-step-dots">
+      <div class="onboard-dot active" id="od0"></div>
+      <div class="onboard-dot" id="od1"></div>
+      <div class="onboard-dot" id="od2"></div>
+    </div>
+    <div class="onboard-icon" id="ob-icon">👆</div>
+    <div class="onboard-title" id="ob-title">Toque num cartão</div>
+    <div class="onboard-body" id="ob-body">A criança toca no cartão que representa o que ela sente ou precisa. O app fala em voz alta.</div>
+    <button class="onboard-btn" onclick="onboardNext()" id="ob-btn">Próximo</button>
+    <button class="onboard-skip" onclick="fecharOnboard()">Pular introdução</button>
+  </div>
+</div>
+
+<div id="snackbar-undo" role="status" aria-live="polite">
+  Histórico apagado
+  <button onclick="desfazerLimpeza()" aria-label="Desfazer limpeza do histórico">Desfazer</button>
+</div>
+
+<div id="modal-limpar" class="modal-confirm" role="dialog" aria-modal="true" aria-label="Confirmar limpeza">
+  <div class="modal-confirm-box">
+    <div class="modal-confirm-title">Apagar histórico?</div>
+    <div class="modal-confirm-body">Todos os dados de uso de hoje serão apagados. Esta ação pode ser desfeita por 8 segundos.</div>
+    <div class="modal-confirm-btns">
+      <button class="btn-cancel-conf" onclick="fecharConfirmLimpar()">Cancelar</button>
+      <button class="btn-ok-conf" onclick="confirmarLimpeza()">Apagar</button>
     </div>
   </div>
 </div>
@@ -582,7 +661,7 @@ const FA={E:{OPEN:'app_open',AGE:'age_selected',CARD:'card_tapped',CALMA_ON:'cal
 
 /* NAVEGAÇÃO */
 function trocarTela(de,para){const a=document.getElementById(de),b=document.getElementById(para);a.classList.add('exit');setTimeout(()=>{a.classList.remove('active','exit');b.classList.add('active');},250);}
-function selecionarIdade(f){perfil=PERFIS[f];document.getElementById('greeting-q').textContent=perfil.saudacao;document.getElementById('header-mascot').innerHTML=`<div style="width:38px;height:38px">${perfil.svg('feliz')}</div>`;document.getElementById('calma-mascot').innerHTML=`<div style="width:38px;height:38px">${perfil.svg('calmo')}</div>`;FA.track(FA.E.AGE,{faixa:f,mascote:perfil.nome});renderizar(CARTOES);trocarTela('tela-idade','tela-app');}
+function selecionarIdade(f){perfil=PERFIS[f];document.getElementById('greeting-q').textContent=perfil.saudacao;document.getElementById('header-mascot').innerHTML=`<div style="width:38px;height:38px">${perfil.svg('feliz')}</div>`;document.getElementById('calma-mascot').innerHTML=`<div style="width:38px;height:38px">${perfil.svg('calmo')}</div>`;FA.track(FA.E.AGE,{faixa:f,mascote:perfil.nome});renderizar(CARTOES);trocarTela('tela-idade','tela-app');setTimeout(checkOnboard,400);}
 function voltarIdade(){trocarTela('tela-app','tela-idade');}
 
 /* RENDERIZAR */
@@ -629,7 +708,7 @@ function abrirOverlay(card,el){
   if(el){const r=document.createElement('div');r.className='pulse-ring';r.style.setProperty('--cc',cfg.color);el.appendChild(r);setTimeout(()=>r.remove(),500);}
   FA.track(FA.E.CARD,{label:card.l,categoria:card.c,calma:card.calma}); registar(card);
   tentarFS(); setTimeout(()=>document.getElementById('btn-entendi').focus(),300);
-  if(card.calma)setTimeout(()=>{fecharOverlay();FA.track(FA.E.CALMA_ON,{origem:'auto'});ativarCalma();},3400);
+  if(card.calma)setTimeout(()=>{fecharOverlay();iniciarAvisoCalma();},6000);
 }
 function mostrarDicaPais(){if(!ativo)return;const cfg=CAT[ativo.c]||CAT.custom;document.getElementById('parent-dica').textContent=ativo.dica||'Responda com calma e presença.';const u=hist[ativo.l]?.count||1;document.getElementById('parent-stats').innerHTML=`<span class="stat-pill">${cfg.label}</span><span>Usado ${u}× hoje</span>`;document.getElementById('ov-parent').classList.add('show');const bte=document.getElementById('btn-entendi');bte.style.display='none';bte.setAttribute('aria-expanded','true');document.getElementById('overlay').classList.add('fase2');setTimeout(()=>document.getElementById('btn-fechar').scrollIntoView({behavior:'smooth',block:'nearest'}),100);}
 function fecharOverlay(){const fase=document.getElementById('ov-parent').classList.contains('show')?'fase2':'fase1';FA.track(FA.E.OV_CLOSE,{label:ativo?.l,fase});document.getElementById('overlay').classList.remove('show','fase2');document.getElementById('ov-emoji').className='';clearInterval(somLoop);somLoop=null;window.speechSynthesis?.cancel();document.fullscreenElement&&document.exitFullscreen().catch(()=>{});}
@@ -745,7 +824,38 @@ function abrirPadroes(){FA.track(FA.E.PADROES);const lista=document.getElementBy
   insightsEl.innerHTML = insightsHtml;
   document.getElementById('panel-padroes').classList.add('show');trapFocus('panel-padroes');}
 function fecharPadroes(e){if(e.target===document.getElementById('panel-padroes'))document.getElementById('panel-padroes').classList.remove('show');}
-function limparHistorico(){FA.track(FA.E.CLEAR,{total:Object.keys(hist).length});Object.keys(hist).forEach(k=>delete hist[k]);document.getElementById('badge').classList.remove('show');const cat=document.querySelector('.cat-btn.active').dataset.cat,t=todos();renderizar(cat==='todas'?t:t.filter(c=>c.c===cat));document.getElementById('panel-padroes').classList.remove('show');mostrarToast('Histórico apagado.');}
+let histSnapshot = null, undoTimer = null;
+function limparHistorico() {
+  document.getElementById('modal-limpar').classList.add('show');
+}
+function fecharConfirmLimpar() {
+  document.getElementById('modal-limpar').classList.remove('show');
+}
+function confirmarLimpeza() {
+  fecharConfirmLimpar();
+  histSnapshot = JSON.parse(JSON.stringify(hist));
+  FA.track(FA.E.CLEAR,{total:Object.keys(hist).length});
+  Object.keys(hist).forEach(k=>delete hist[k]);
+  document.getElementById('badge').classList.remove('show');
+  const cat=document.querySelector('.cat-btn.active').dataset.cat,t=todos();
+  renderizar(cat==='todas'?t:t.filter(c=>c.c===cat));
+  document.getElementById('panel-padroes').classList.remove('show');
+  // Snackbar desfazer por 8s
+  const sb = document.getElementById('snackbar-undo');
+  sb.classList.add('show');
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(()=>{ sb.classList.remove('show'); histSnapshot=null; }, 8000);
+}
+function desfazerLimpeza() {
+  if (!histSnapshot) return;
+  Object.assign(hist, histSnapshot); histSnapshot=null;
+  clearTimeout(undoTimer);
+  document.getElementById('snackbar-undo').classList.remove('show');
+  document.getElementById('badge').classList.add('show');
+  const cat=document.querySelector('.cat-btn.active').dataset.cat,t=todos();
+  renderizar(cat==='todas'?t:t.filter(c=>c.c===cat));
+  mostrarToast('Histórico restaurado ✓','ok');
+}
 
 /* CARTÃO PERSONALIZADO */
 function validarCampo(inp,errId){const val=inp.value.trim(),min=parseInt(inp.getAttribute('minlength')||'1'),ok=val.length>=min;const errEl=document.getElementById(errId);inp.classList.toggle('erro',!ok&&val.length>0);errEl.classList.toggle('show',!ok&&val.length>0);inp.setAttribute('aria-invalid',String(!ok&&val.length>0));const nOk=document.getElementById('inp-nome').value.trim().length>=2,fOk=document.getElementById('inp-frase').value.trim().length>=3,btn=document.getElementById('btn-salvar');btn.disabled=!(nOk&&fOk);btn.setAttribute('aria-disabled',String(!(nOk&&fOk)));}
@@ -935,6 +1045,67 @@ function enviarTerapeuta() {
     `Olá,\n\nSegue o relatório de comunicação gerado pelo app Fala Fácil.\n\nData: ${d.data}\nToques: ${d.total} | Únicos: ${d.unicos} | Emocionais: ${d.qtdEmoc}\nCategoria principal: ${d.topCat}\n\nCartões utilizados:\n${d.cartoes}\n\nPadrão identificado: ${d.padrao}\nSugestão: ${d.sugestao}\n\nRecomendações:\n${d.recomendacoes.map((r,i)=>(i+1)+'. '+r).join('\n')}\n\n⚠️ Este relatório é uma sugestão baseada no uso do app e não substitui orientação profissional.\n\nGerado pelo Fala Fácil`
   );
   window.open(`mailto:?subject=${assunto}&body=${corpo}`);
+}
+
+
+const ONBOARD_STEPS = [
+  {icon:'👆', title:'Toque num cartão', body:'A criança toca no cartão que representa o que ela sente ou precisa. O app fala em voz alta.', btn:'Próximo'},
+  {icon:'👀', title:'Você vê na tela', body:'O cartão aparece em tela cheia com o nome e uma frase. Toque em "Entendi" para ver dicas de como responder.', btn:'Próximo'},
+  {icon:'📊', title:'Acompanhe os padrões', body:'Em "Histórico", o app mostra os cartões mais usados e identifica padrões de comunicação do dia.', btn:'Começar'},
+];
+let onboardStep = 0;
+function mostrarOnboardStep(i) {
+  const s = ONBOARD_STEPS[i];
+  document.getElementById('ob-icon').textContent  = s.icon;
+  document.getElementById('ob-title').textContent = s.title;
+  document.getElementById('ob-body').textContent  = s.body;
+  document.getElementById('ob-btn').textContent   = s.btn;
+  [0,1,2].forEach(j => {
+    const d = document.getElementById('od'+j);
+    d.classList.toggle('active', j===i);
+  });
+}
+function onboardNext() {
+  if (onboardStep < 2) { onboardStep++; mostrarOnboardStep(onboardStep); }
+  else fecharOnboard();
+}
+function fecharOnboard() {
+  document.getElementById('onboard-overlay').classList.remove('show');
+  try { localStorage.setItem('ff_onboard_done','1'); } catch(e){}
+}
+function abrirOnboard() {
+  onboardStep = 0; mostrarOnboardStep(0);
+  document.getElementById('onboard-overlay').classList.add('show');
+}
+// Mostra onboarding no primeiro acesso
+function checkOnboard() {
+  try { if (!localStorage.getItem('ff_onboard_done')) abrirOnboard(); } catch(e){}
+}
+
+
+let calmaAvisoTimer=null, calmaCancelado=false;
+function iniciarAvisoCalma(){
+  calmaCancelado=false;
+  const av=document.getElementById('calma-aviso');
+  const cd=document.getElementById('calma-countdown');
+  av.classList.add('show'); cd.textContent='3';
+  let c=3;
+  calmaAvisoTimer=setInterval(()=>{
+    if(calmaCancelado){clearInterval(calmaAvisoTimer);av.classList.remove('show');return;}
+    c--;
+    if(c>0){cd.textContent=c;}
+    else{
+      clearInterval(calmaAvisoTimer);
+      av.classList.remove('show');
+      FA.track(FA.E.CALMA_ON,{origem:'auto'});
+      ativarCalma();
+    }
+  },1000);
+}
+function cancelarModoCalma(){
+  calmaCancelado=true;
+  clearInterval(calmaAvisoTimer);
+  document.getElementById('calma-aviso').classList.remove('show');
 }
 
 /* UTILITÁRIOS */
