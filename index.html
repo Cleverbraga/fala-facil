@@ -450,8 +450,7 @@
         <div class="brand-logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
         <span class="brand-name">Fala Fácil</span>
       </div>
-      <button class="help-btn" onclick="abrirOnboard()" aria-label="Ajuda e instruções">?</button>
-      <div class="header-mascot" id="header-mascot" role="button" tabindex="0" aria-label="Abrir modo calma" onclick="pularParaCalma()" onkeydown="if(event.key==='Enter')pularParaCalma()"></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="header-mascot" id="header-mascot" role="button" tabindex="0" aria-label="Abrir modo calma" onclick="pularParaCalma()" onkeydown="if(event.key==='Enter')pularParaCalma()"></div><button class="help-btn" onclick="abrirOnboard()" aria-label="Ajuda e instruções">?</button></div>
     </header>
     <div class="greeting"><div class="greeting-hi">Olá!</div><div class="greeting-q" id="greeting-q">O que você precisa?</div></div>
     <div class="cats-wrap">
@@ -1111,7 +1110,7 @@ function cancelarModoCalma(){
 /* UTILITÁRIOS */
 function mostrarToast(msg,tipo=''){const el=document.getElementById('toast');el.textContent=msg;el.className='show '+tipo;clearTimeout(toastTmr);toastTmr=setTimeout(()=>el.className='',3000);}
 function trapFocus(id){const m=document.getElementById(id),els=m.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');if(!els.length)return;const first=els[0],last=els[els.length-1];m.addEventListener('keydown',function h(e){if(e.key!=='Tab')return;if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}else{if(document.activeElement===last){e.preventDefault();first.focus();}}if(!m.classList.contains('show'))m.removeEventListener('keydown',h);});first.focus();}
-function tentarFS(){const el=document.getElementById('overlay'),req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;if(req)req.call(el).catch(()=>{});}
+function tentarFS(){if(window.innerWidth>768)return;const el=document.getElementById('overlay'),req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen;if(req)req.call(el).catch(()=>{});}
 function verificarTTS(){if(!('speechSynthesis' in window)){document.getElementById('tts-warn').classList.add('show');FA.track(FA.E.TTS_FAIL);}}
 
 /* TECLADO */
