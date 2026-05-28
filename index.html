@@ -246,6 +246,16 @@
 
     /* ── TABLET (768px+) ── */
 
+
+    /* ── RELATÓRIO PDF — botões de ação ── */
+    .report-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+    .report-btn{width:100%;padding:13px 16px;border:none;border-radius:var(--r-full);font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity var(--dur-f),transform var(--dur-f);min-height:44px}
+    .report-btn:hover{opacity:.88}.report-btn:active{transform:scale(.97)}
+    .report-btn.primary{background:var(--brand);color:white;box-shadow:0 4px 14px rgba(108,92,231,.35)}
+    .report-btn.secondary{background:var(--surface-in);color:var(--text)}
+    .report-btn.tertiary{background:#E8F0FE;color:#1A73E8}
+    .report-divider{height:.5px;background:var(--border);margin:16px 0}
+
     /* ── MICROFEEDBACK: tap animation (TEA-friendly) ── */
     @keyframes cardPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
     @keyframes iconWiggle{0%{transform:rotate(0deg)}40%{transform:rotate(6deg)}80%{transform:rotate(-2deg)}100%{transform:rotate(0deg)}}
@@ -503,6 +513,18 @@
     <div style="font-size:13px;font-weight:700;color:var(--text-mid);letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px">Recomendações</div>
     <div id="detail-recom"></div>
     <p style="font-size:11px;color:var(--text-light);line-height:1.5;margin-top:16px;padding:10px 12px;background:var(--bg);border-radius:10px">⚠️ Esses padrões são sugestões baseadas no uso do app e não substituem orientação profissional.</p>
+    <div class="report-divider"></div>
+    <div class="report-actions">
+      <button class="report-btn primary" onclick="gerarPDF()" aria-label="Salvar relatório em PDF">
+        📄 Salvar PDF
+      </button>
+      <button class="report-btn tertiary" onclick="compartilharRelatorio()" aria-label="Compartilhar relatório">
+        🔗 Compartilhar
+      </button>
+      <button class="report-btn secondary" onclick="enviarTerapeuta()" aria-label="Enviar para terapeuta">
+        👩‍⚕️ Enviar para terapeuta
+      </button>
+    </div>
   </div>
 </div>
 
@@ -744,6 +766,177 @@ function animarCard(el) {
   setTimeout(() => el.classList.remove('tap-anim'), 320);
 }
 
+
+/* ── RELATÓRIO PDF ─────────────────────────────────────────────
+   Usa jsPDF (CDN) — sem backend, funciona em Netlify e PWA
+   ──────────────────────────────────────────────────────────── */
+
+/* Carrega jsPDF sob demanda (só quando necessário) */
+function carregarJsPDF() {
+  return new Promise((resolve, reject) => {
+    if (window.jspdf) { resolve(window.jspdf.jsPDF); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload  = () => resolve(window.jspdf.jsPDF);
+    s.onerror = () => reject(new Error('jsPDF não carregou'));
+    document.head.appendChild(s);
+  });
+}
+
+/* Monta os dados do relatório a partir do histórico atual */
+function dadosRelatorio() {
+  const ord   = Object.entries(hist).sort((a,b)=>b[1].count-a[1].count);
+  const total = ord.reduce((s,[,d])=>s+d.count,0);
+  const unicos= ord.length;
+  const qtdEmoc = ord.filter(([,d])=>d.c==='emocao').reduce((s,[,d])=>s+d.count,0);
+  const topCat  = ord[0] ? (CAT[ord[0][1].c]?.label||'—') : '—';
+  const cartoes = ord.map(([lbl,d])=>`${lbl} (${d.count}×)`).join(', ') || 'Nenhum';
+
+  // Detecta padrão predominante (mesma lógica do gerarInsights)
+  const labels   = ord.map(([l])=>l);
+  let padrao='Comunicação ativa';
+  let sugestao='Continue registrando o uso. Com mais dados, os padrões ficam mais claros.';
+  if(labels.includes('Com raiva') && (ord.find(([l])=>l==='Com raiva')?.[1].count||0)>=3){
+    padrao='Emoção intensa recorrente';
+    sugestao='Observe se houve mudança de rotina ou excesso de estímulos sensoriais.';
+  } else if(labels.includes('Ir para casa') && (labels.includes('Avó')||labels.includes('Avô'))){
+    padrao='Desejo de segurança';
+    sugestao='Uma pausa em local familiar e tranquilo pode ajudar a regular as emoções.';
+  } else if(qtdEmoc/Math.max(total,1)>0.5){
+    padrao='Expressão emocional elevada';
+    sugestao='Atividades calmas e previsíveis costumam ajudar em momentos assim.';
+  }
+
+  const recomendacoes = [
+    'Observe o horário de maior uso — pode coincidir com momentos de transição ou cansaço.',
+    'Cartões emocionais frequentes podem indicar necessidade de mais suporte regulatório.',
+    'Compartilhe o histórico com o terapeuta ou escola para enriquecer o acompanhamento.',
+    'Cartões repetidos em sequência costumam ter significado — vale anotar o contexto.',
+  ];
+
+  return { total, unicos, qtdEmoc, topCat, cartoes, padrao, sugestao, recomendacoes,
+           data: new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'}),
+           hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) };
+}
+
+/* Gera e baixa o PDF */
+async function gerarPDF() {
+  mostrarToast('Gerando PDF...', '');
+  try {
+    const JsPDF = await carregarJsPDF();
+    const d = dadosRelatorio();
+    const doc = new JsPDF({ unit:'mm', format:'a4' });
+    const W = 210, pad = 20;
+    let y = 20;
+
+    const cor  = [108, 92, 231]; // --brand
+    const cinza= [100, 100, 100];
+    const leve = [240, 240, 245];
+
+    /* Cabeçalho */
+    doc.setFillColor(...cor);
+    doc.roundedRect(0, 0, W, 38, 0, 0, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20); doc.setFont('helvetica','bold');
+    doc.text('Fala Fácil', pad, 16);
+    doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.text('Relatório de comunicação — gerado pelo app', pad, 24);
+    doc.text(`${d.data} às ${d.hora}`, pad, 31);
+    y = 50;
+
+    /* Métricas */
+    doc.setTextColor(...cor);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('RESUMO DO DIA', pad, y); y += 6;
+
+    const metricas = [
+      ['Toques registrados', d.total],
+      ['Cartões únicos usados', d.unicos],
+      ['Cartões emocionais', d.qtdEmoc],
+      ['Categoria principal', d.topCat],
+    ];
+    metricas.forEach(([label,val]) => {
+      doc.setFillColor(...leve);
+      doc.roundedRect(pad, y, 80, 12, 2, 2, 'F');
+      doc.setTextColor(...cinza); doc.setFontSize(9); doc.setFont('helvetica','normal');
+      doc.text(label, pad+4, y+7.5);
+      doc.setTextColor(...cor); doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.text(String(val), pad+60, y+7.5);
+      y += 15;
+    });
+    y += 4;
+
+    /* Cartões usados */
+    doc.setTextColor(...cor);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('CARTÕES UTILIZADOS', pad, y); y += 7;
+    doc.setTextColor(60,60,60); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    const linhasCartoes = doc.splitTextToSize(d.cartoes, W - pad*2);
+    doc.text(linhasCartoes, pad, y); y += linhasCartoes.length * 5 + 6;
+
+    /* Padrão identificado */
+    doc.setTextColor(...cor);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('PADRÃO IDENTIFICADO', pad, y); y += 7;
+    doc.setFillColor(245, 240, 255);
+    const textosPad = doc.splitTextToSize(d.padrao, W-pad*2-8);
+    const textosSug = doc.splitTextToSize('Sugestão: ' + d.sugestao, W-pad*2-8);
+    const hPad = (textosPad.length + textosSug.length) * 5 + 12;
+    doc.roundedRect(pad, y, W-pad*2, hPad, 3, 3, 'F');
+    doc.setTextColor(62,43,107); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text(textosPad, pad+4, y+7); y += textosPad.length*5+4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80,60,120);
+    doc.text(textosSug, pad+4, y+3); y += textosSug.length*5 + 14;
+
+    /* Recomendações */
+    doc.setTextColor(...cor);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text('RECOMENDAÇÕES', pad, y); y += 7;
+    d.recomendacoes.forEach(r => {
+      const linhas = doc.splitTextToSize('• ' + r, W-pad*2);
+      doc.setTextColor(60,60,60); doc.setFontSize(9); doc.setFont('helvetica','normal');
+      doc.text(linhas, pad, y); y += linhas.length * 5 + 3;
+    });
+    y += 6;
+
+    /* Rodapé */
+    doc.setDrawColor(...leve); doc.line(pad, y, W-pad, y); y += 6;
+    doc.setTextColor(160,160,160); doc.setFontSize(8);
+    doc.text('⚠️ Este relatório é baseado no uso do app e não substitui orientação profissional.', pad, y);
+
+    /* Download */
+    const nome = `fala-facil-${new Date().toISOString().slice(0,10)}.pdf`;
+    doc.save(nome);
+    mostrarToast('PDF salvo! 📄', 'ok');
+  } catch(e) {
+    mostrarToast('Erro ao gerar PDF.', 'err');
+  }
+}
+
+/* Compartilha via Web Share API ou fallback */
+async function compartilharRelatorio() {
+  const d = dadosRelatorio();
+  const texto = `Fala Fácil — Relatório ${d.data}\n\nToques: ${d.total} | Únicos: ${d.unicos} | Emocionais: ${d.qtdEmoc}\nCategoria top: ${d.topCat}\nPadrão: ${d.padrao}\n\nCartões: ${d.cartoes}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title:'Relatório Fala Fácil', text:texto });
+    } catch(e) { /* usuário cancelou */ }
+  } else {
+    await navigator.clipboard.writeText(texto).catch(()=>{});
+    mostrarToast('Copiado para a área de transferência 📋', 'ok');
+  }
+}
+
+/* Enviar para terapeuta — abre cliente de e-mail com dados */
+function enviarTerapeuta() {
+  const d = dadosRelatorio();
+  const assunto = encodeURIComponent(`Relatório Fala Fácil — ${d.data}`);
+  const corpo   = encodeURIComponent(
+    `Olá,\n\nSegue o relatório de comunicação gerado pelo app Fala Fácil.\n\nData: ${d.data}\nToques: ${d.total} | Únicos: ${d.unicos} | Emocionais: ${d.qtdEmoc}\nCategoria principal: ${d.topCat}\n\nCartões utilizados:\n${d.cartoes}\n\nPadrão identificado: ${d.padrao}\nSugestão: ${d.sugestao}\n\nRecomendações:\n${d.recomendacoes.map((r,i)=>(i+1)+'. '+r).join('\n')}\n\n⚠️ Este relatório é uma sugestão baseada no uso do app e não substitui orientação profissional.\n\nGerado pelo Fala Fácil`
+  );
+  window.open(`mailto:?subject=${assunto}&body=${corpo}`);
+}
+
 /* UTILITÁRIOS */
 function mostrarToast(msg,tipo=''){const el=document.getElementById('toast');el.textContent=msg;el.className='show '+tipo;clearTimeout(toastTmr);toastTmr=setTimeout(()=>el.className='',3000);}
 function trapFocus(id){const m=document.getElementById(id),els=m.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');if(!els.length)return;const first=els[0],last=els[els.length-1];m.addEventListener('keydown',function h(e){if(e.key!=='Tab')return;if(e.shiftKey){if(document.activeElement===first){e.preventDefault();last.focus();}}else{if(document.activeElement===last){e.preventDefault();first.focus();}}if(!m.classList.contains('show'))m.removeEventListener('keydown',h);});first.focus();}
@@ -769,14 +962,20 @@ function irParaIdade(){pararMusicaCapa();trocarTela('tela-capa','tela-idade');}
 /* Música capa — lullaby suave, sinais repetitivos, TEA-friendly */
 let capaAudioCtx = null, capaGain = null, capaPlaying = false, capaNodes = [];
 
-function tocarMusicaCapa() {
+async function tocarMusicaCapa() {
   if (capaPlaying) return;
   try {
-    capaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    capaGain = capaAudioCtx.createGain();
-    capaGain.gain.value = 0;
-    capaGain.connect(capaAudioCtx.destination);
-    // Fade in suave
+    // Reutiliza AudioContext pré-aquecido se disponível
+    if (!capaAudioCtx) {
+      capaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      capaGain = capaAudioCtx.createGain();
+      capaGain.gain.value = 0;
+      capaGain.connect(capaAudioCtx.destination);
+    }
+    if (capaAudioCtx.state === 'suspended') await capaAudioCtx.resume();
+    // Fade in imediato
+    capaGain.gain.cancelScheduledValues(capaAudioCtx.currentTime);
+    capaGain.gain.setValueAtTime(0, capaAudioCtx.currentTime);
     capaGain.gain.linearRampToValueAtTime(0.45, capaAudioCtx.currentTime + 0.3);
     capaPlaying = true;
 
@@ -823,13 +1022,31 @@ function pararMusicaCapa() {
 FA.track(FA.E.OPEN);
 verificarTTS();
 
+// Pré-aquece o AudioContext no primeiro evento de interação
+// (resolve o delay no Netlify/Chrome/Safari por política de autoplay)
 (function(){
-  const attempt = () => tocarMusicaCapa();
-  // Tenta imediatamente (funciona em ambientes que permitem autoplay)
-  attempt();
-  // Fallback: primeiro toque caso autoplay seja bloqueado
+  const eventos = ['pointerdown','touchstart','mousedown','keydown'];
+  function preAquecer() {
+    eventos.forEach(ev => document.removeEventListener(ev, preAquecer));
+    if (!capaAudioCtx) {
+      capaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      capaGain = capaAudioCtx.createGain();
+      capaGain.gain.value = 0;
+      capaGain.connect(capaAudioCtx.destination);
+    }
+    // Resume caso esteja suspenso (Chrome bloqueia até interação)
+    if (capaAudioCtx.state === 'suspended') capaAudioCtx.resume();
+  }
+  eventos.forEach(ev => document.addEventListener(ev, preAquecer, {once:true}));
+
+  // Ao tocar a capa especificamente: inicia a melodia imediatamente
   document.getElementById('tela-capa').addEventListener('pointerdown', function h(){
-    tocarMusicaCapa(); this.removeEventListener('pointerdown', h);
+    this.removeEventListener('pointerdown', h);
+    if (capaAudioCtx && capaAudioCtx.state === 'suspended') {
+      capaAudioCtx.resume().then(() => tocarMusicaCapa());
+    } else {
+      tocarMusicaCapa();
+    }
   }, {once:true});
 })();
 
