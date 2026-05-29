@@ -680,7 +680,7 @@ const PERFIS={'3a6':{nome:'Bolito',saudacao:'O que você quer?',taxa:.78,pitch:1
 const CARTOES=[
   {e:'🍎',l:'Com fome',      f:'Quero comer alguma coisa',        c:'necessidade',calma:false,expr:'neutro',dica:'Ofereça 2 ou 3 opções visuais de comida. Escolha fechada reduz a ansiedade.',         som:{t:'duplo',   f1:220,f2:277,d:.5}},
   {e:'💧',l:'Com sede',      f:'Quero beber água',                c:'necessidade',calma:false,expr:'neutro',dica:'Mantenha o copo favorito sempre visível e acessível.',                                 som:{t:'suave',   f1:196,d:.6}},
-  {e:'🚽',l:'Banheiro',      f:'Preciso ir ao banheiro',          c:'necessidade',calma:false,expr:'neutro',dica:"Vá diretamente sem perguntas. 'Vamos já' é mais eficaz do que 'tem certeza?'.",       som:{t:'urgente', f1:311,f2:370,d:.35}},
+  {e:'🚽',l:'Banheiro',      f:'Preciso ir ao banheiro',          c:'necessidade',calma:false,expr:'neutro',dica:'Va diretamente sem perguntas. Diga: Vamos ja. Isso é mais eficaz do que perguntar se tem certeza.',       som:{t:'urgente', f1:311,f2:370,d:.35}},
   {e:'😴',l:'Com sono',      f:'Quero descansar',                 c:'necessidade',calma:false,expr:'calmo', dica:'Inicie a rotina de sono imediatamente, sem negociação.',                               som:{t:'lento',   f1:174,d:.9}},
   {e:'🤕',l:'Dói aqui',      f:'Estou com dor',                   c:'necessidade',calma:false,expr:'triste',dica:'Aponte e pergunte em partes específicas. Verifique cabeça, barriga e ouvidos.',       som:{t:'urgente', f1:349,f2:294,d:.4}},
   {e:'🧸',l:'Quero abraço',  f:'Preciso de carinho',              c:'necessidade',calma:false,expr:'feliz', dica:'Abraço firme e silencioso. Pressão profunda é mais reguladora do que abraço leve.',   som:{t:'suave',   f1:261,d:.7}},
@@ -699,7 +699,7 @@ const CARTOES=[
   {e:'🎵',l:'Música',        f:'Quero ouvir a minha música',      c:'atividade',calma:false,expr:'feliz',dica:'Músicas familiares são reguladoras. Mantenha uma playlist da criança acessível.',         som:{t:'alegre',  f1:392,f2:494,f3:587,d:.3}},
   {e:'🏃',l:'Brincar fora',  f:'Quero brincar lá fora',          c:'atividade',calma:false,expr:'feliz',dica:'Movimento físico é uma das melhores ferramentas de autorregulação.',                       som:{t:'ascend',  f1:349,f2:523,d:.4}},
   {e:'✋',l:'Parar',          f:'Quero parar agora',               c:'atividade',calma:false,expr:'neutro',dica:'Respeite imediatamente. Valide. Depois explore o motivo com calma.',                   som:{t:'urgente', f1:440,f2:392,d:.3}},
-  {e:'🏠',l:'Ir para casa',  f:'Quero ir para casa',              c:'lugar',calma:false,expr:'calmo', dica:"Se não for imediato, informe o tempo exato: 'em 15 minutos vamos' — e cumpra.",             som:{t:'longo',   f1:261,f2:329,d:.7}},
+  {e:'🏠',l:'Ir para casa',  f:'Quero ir para casa',              c:'lugar',calma:false,expr:'calmo', dica:'Se nao for imediato, informe o tempo exato: em 15 minutos vamos. E cumpra o combinado.',             som:{t:'longo',   f1:261,f2:329,d:.7}},
   {e:'🛏️',l:'Meu quarto',   f:'Quero ir para o meu quarto',     c:'lugar',calma:false,expr:'calmo', dica:'O quarto é o espaço de descompressão. Isolamento não é punição, é regulação.',              som:{t:'longo',   f1:246,f2:311,d:.8}},
   {e:'🌳',l:'Parque',        f:'Quero ir ao parque',              c:'lugar',calma:false,expr:'feliz', dica:'Combine antes: quanto tempo ficam e quando saem. Use timer visual para a saída.',            som:{t:'longo',   f1:293,f2:369,d:.6}},
   {e:'🚗',l:'No carro',      f:'Quero entrar no carro',           c:'lugar',calma:false,expr:'calmo', dica:'O carro pode ser espaço de descompressão: fechado, previsível e com música.',               som:{t:'longo',   f1:277,f2:349,d:.65}},
@@ -756,9 +756,23 @@ function abrirOverlay(card,el){
   const ov=document.getElementById('overlay');
   document.getElementById('ov-bar').style.background=cfg.color; document.getElementById('ov-child').style.background=cfg.bg; ov.style.setProperty('--ov-color',cfg.color);
   const tag=document.getElementById('parent-tag'); tag.style.background=cfg.bg; tag.style.color=cfg.color;
+  // Preenche dica imediatamente (necessário para o layout tablet que mostra painel sempre)
+  if(card.dica){
+    const cfg2=CAT[card.c]||CAT.custom;
+    document.getElementById('parent-dica').textContent=card.dica;
+    document.getElementById('parent-stats').innerHTML='<span class="stat-pill">'+cfg2.label+'</span>';
+    document.getElementById('parent-tag').style.background=cfg.bg;
+    document.getElementById('parent-tag').style.color=cfg.color;
+  }
   document.getElementById('ov-parent').classList.remove('show');
   const bte=document.getElementById('btn-entendi'); bte.style.display=''; bte.setAttribute('aria-expanded','false');
   ov.classList.remove('fase2'); ov.classList.add('show');
+  // Tablet: mostra painel dos pais imediatamente (layout 2 colunas)
+  if(window.innerWidth>=768){
+    document.getElementById('ov-parent').classList.add('show');
+    bte.style.display='none';
+    ov.classList.add('fase2');
+  }
   falar(card.l); tocarSom(card.som);
   const sind=document.getElementById('sound-ind'); sind.classList.add('on'); setTimeout(()=>sind.classList.remove('on'),1800);
   clearInterval(somLoop); somLoop=setInterval(()=>{if(ov.classList.contains('show'))tocarSom(card.som);},3200);
