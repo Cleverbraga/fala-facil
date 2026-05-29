@@ -17,6 +17,13 @@
   <title>Fala Fácil — Comunicação Visual para Crianças com TEA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- Música da capa: autoplay nativo, sem Web Audio API -->
+  <audio id="capa-audio" autoplay loop preload="auto"
+         style="display:none"
+         aria-hidden="true">
+    <!-- Lullaby suave — royalty-free (Pixabay) -->
+    <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b5335d.mp3" type="audio/mpeg"/>
+  </audio>
   <style>
     :root {
       --bg:#F7F3EF; --surface:#FFFFFF; --surface-in:#F0EDE8;
@@ -194,6 +201,25 @@
     .onboard-skip{width:100%;padding:10px;background:transparent;border:none;font-family:var(--font);font-size:13px;font-weight:600;color:var(--text-mid);cursor:pointer}
     .help-btn{width:32px;height:32px;border-radius:50%;background:var(--surface-in);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;font-weight:800;color:var(--text-mid);font-family:var(--font);flex-shrink:0;transition:background var(--dur-f)}
     .help-btn:hover{background:var(--brand-light);color:var(--brand)}
+
+
+    #modal-email{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity var(--dur-m);padding:24px}
+    #modal-email.show{opacity:1;pointer-events:all}
+    .email-box{background:white;border-radius:var(--r-xl);padding:24px;width:100%;max-width:360px;box-shadow:var(--sh-lg)}
+    .email-box h3{font-size:17px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px}
+    .email-box p{font-size:13px;color:var(--text-mid);line-height:1.55;margin-bottom:16px}
+    .email-input-wrap{position:relative;margin-bottom:14px}
+    .email-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none}
+    #inp-email-terap{width:100%;padding:12px 14px 12px 38px;background:var(--surface-in);border:1.5px solid transparent;border-radius:var(--r-md);font-family:var(--font);font-size:15px;font-weight:500;color:var(--text);outline:none;transition:border-color var(--dur-f)}
+    #inp-email-terap:focus{border-color:var(--brand);background:white}
+    #inp-email-terap.erro{border-color:var(--danger);background:#FFF5F5}
+    .email-info{font-size:11px;color:var(--text-light);background:var(--bg);border-radius:var(--r-md);padding:10px 12px;line-height:1.5;margin-bottom:16px}
+    .email-info strong{color:var(--text-mid)}
+    .email-actions{display:flex;gap:8px}
+    .email-actions button{flex:1;padding:13px;border-radius:var(--r-full);font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;min-height:44px;border:none}
+    .btn-email-cancel{background:var(--surface-in);color:var(--text)}
+    .btn-email-ok{background:var(--brand);color:white;box-shadow:0 4px 14px rgba(108,92,231,.35)}
+    .btn-email-ok:disabled{background:var(--text-light);box-shadow:none;cursor:not-allowed}
 
     .modal-confirm{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity var(--dur-m);padding:24px}
     .modal-confirm.show{opacity:1;pointer-events:all}
@@ -613,6 +639,27 @@
     <div class="modal-confirm-btns">
       <button class="btn-cancel-conf" onclick="fecharConfirmLimpar()">Cancelar</button>
       <button class="btn-ok-conf" onclick="confirmarLimpeza()">Apagar</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="modal-email" role="dialog" aria-modal="true" aria-label="Enviar para terapeuta" onclick="fecharModalEmail(event)">
+  <div class="email-box">
+    <h3>📧 Enviar para terapeuta</h3>
+    <p>Digite o e-mail do terapeuta. O app vai gerar o PDF e abrir o seu cliente de e-mail com tudo preenchido.</p>
+    <div class="email-input-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ABABAB" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      <input id="inp-email-terap" type="email" placeholder="email@terapeuta.com"
+             aria-label="E-mail do terapeuta" autocomplete="email"
+             oninput="validarEmailTerap(this)"/>
+    </div>
+    <div class="email-info">
+      <strong>Como funciona:</strong> o PDF será baixado automaticamente no seu dispositivo. Depois, anexe-o ao e-mail que será aberto no seu aplicativo de correio.
+    </div>
+    <div class="email-actions">
+      <button class="btn-email-cancel" onclick="fecharModalEmail()">Cancelar</button>
+      <button class="btn-email-ok" id="btn-email-ok" onclick="confirmarEnvioEmail()" disabled aria-disabled="true">Gerar e Enviar</button>
     </div>
   </div>
 </div>
@@ -1048,14 +1095,59 @@ async function compartilharRelatorio() {
 }
 
 /* Enviar para terapeuta — abre cliente de e-mail com dados */
+/* Abre modal para digitar e-mail do terapeuta */
 function enviarTerapeuta() {
-  const d = dadosRelatorio();
-  const assunto = encodeURIComponent(`Relatório Fala Fácil — ${d.data}`);
-  const corpo   = encodeURIComponent(
-    `Olá,\n\nSegue o relatório de comunicação gerado pelo app Fala Fácil.\n\nData: ${d.data}\nToques: ${d.total} | Únicos: ${d.unicos} | Emocionais: ${d.qtdEmoc}\nCategoria principal: ${d.topCat}\n\nCartões utilizados:\n${d.cartoes}\n\nPadrão identificado: ${d.padrao}\nSugestão: ${d.sugestao}\n\nRecomendações:\n${d.recomendacoes.map((r,i)=>(i+1)+'. '+r).join('\n')}\n\n⚠️ Este relatório é uma sugestão baseada no uso do app e não substitui orientação profissional.\n\nGerado pelo Fala Fácil`
-  );
-  window.open(`mailto:?subject=${assunto}&body=${corpo}`);
+  const inp = document.getElementById('inp-email-terap');
+  inp.value = '';
+  inp.classList.remove('erro');
+  document.getElementById('btn-email-ok').disabled = true;
+  document.getElementById('modal-email').classList.add('show');
+  setTimeout(() => inp.focus(), 300);
 }
+
+function fecharModalEmail(e) {
+  if (!e || e.target === document.getElementById('modal-email'))
+    document.getElementById('modal-email').classList.remove('show');
+}
+
+function validarEmailTerap(inp) {
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim());
+  inp.classList.toggle('erro', inp.value.length > 0 && !ok);
+  const btn = document.getElementById('btn-email-ok');
+  btn.disabled = !ok;
+  btn.setAttribute('aria-disabled', String(!ok));
+}
+
+/* Gera PDF + abre mailto com e-mail preenchido */
+async function confirmarEnvioEmail() {
+  const email = document.getElementById('inp-email-terap').value.trim();
+  if (!email) return;
+  fecharModalEmail();
+  mostrarToast('Gerando PDF...', '');
+  await gerarPDF();
+  const d = dadosRelatorio();
+  const NL = '%0A';
+  const assunto = encodeURIComponent('Relatorio Fala Facil - ' + d.data);
+  const linhas = [
+    'Ola,','',
+    'Segue em anexo o relatorio gerado pelo app Fala Facil.','',
+    'IMPORTANTE: Anexe o PDF baixado automaticamente no seu dispositivo.','',
+    '--- RESUMO: ' + d.data + ' ---',
+    'Toques: ' + d.total + ' | Unicos: ' + d.unicos + ' | Emocionais: ' + d.qtdEmoc,
+    'Categoria principal: ' + d.topCat,'',
+    'Cartoes: ' + d.cartoes,'',
+    'Padrao: ' + d.padrao,
+    'Sugestao: ' + d.sugestao,'',
+    'Recomendacoes:'
+  ].concat(d.recomendacoes.map(function(r,i){return (i+1)+'. '+r;})).concat([
+    '','Nao substitui orientacao profissional.','','Gerado pelo Fala Facil'
+  ]);
+  const corpo = linhas.map(function(l){return encodeURIComponent(l);}).join(NL);
+  setTimeout(function(){
+    window.location.href = 'mailto:' + encodeURIComponent(email) + '?subject=' + assunto + '&body=' + corpo;
+  }, 800);
+}
+
 
 
 const ONBOARD_STEPS = [
@@ -1125,14 +1217,15 @@ function tentarFS(){if(window.innerWidth>768)return;const el=document.getElement
 function verificarTTS(){if(!('speechSynthesis' in window)){document.getElementById('tts-warn').classList.add('show');FA.track(FA.E.TTS_FAIL);}}
 
 /* TECLADO */
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharOverlay();fecharCalma();['panel-padroes','modal-custom','modal-insights'].forEach(id=>document.getElementById(id).classList.remove('show'));}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharOverlay();fecharCalma();['panel-padroes','modal-custom','modal-insights','modal-email'].forEach(id=>document.getElementById(id).classList.remove('show'));}});
 
 
 
 let mutado = false;
 function toggleMute() {
   mutado = !mutado;
-  if (capaGain) capaGain.gain.value = mutado ? 0 : 0.45;
+  const a = document.getElementById('capa-audio');
+  if (a) a.volume = mutado ? 0 : 0.35;
   document.getElementById('capa-mute-icon').className = mutado ? 'ti ti-volume-off' : 'ti ti-volume';
   document.getElementById('capa-mute-btn').setAttribute('aria-label', mutado ? 'Ativar música' : 'Silenciar música');
 }
@@ -1141,95 +1234,37 @@ function irParaIdade(){pararMusicaCapa();trocarTela('tela-capa','tela-idade');}
 
 
 /* Música capa — lullaby suave, sinais repetitivos, TEA-friendly */
-let capaAudioCtx = null, capaGain = null, capaPlaying = false, capaNodes = [];
+// Música da capa gerida pelo elemento <audio> nativo (autoplay)
 
-async function tocarMusicaCapa() {
-  if (capaPlaying) return;
-  try {
-    // Reutiliza AudioContext pré-aquecido se disponível
-    if (!capaAudioCtx) {
-      capaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      capaGain = capaAudioCtx.createGain();
-      capaGain.gain.value = 0;
-      capaGain.connect(capaAudioCtx.destination);
-    }
-    if (capaAudioCtx.state === 'suspended') await capaAudioCtx.resume();
-    // Fade in imediato
-    capaGain.gain.cancelScheduledValues(capaAudioCtx.currentTime);
-    capaGain.gain.setValueAtTime(0, capaAudioCtx.currentTime);
-    capaGain.gain.linearRampToValueAtTime(0.45, capaAudioCtx.currentTime + 0.3);
-    capaPlaying = true;
 
-    // Melodia pentatônica — 8 notas simples e repetitivas (Mi, Sol, Lá, Si, Re)
-    const notas = [329.63, 392, 440, 493.88, 587.33, 493.88, 440, 392];
-    const dur = 0.7; // duração por nota (lento)
-    let t = capaAudioCtx.currentTime;
-
-    function tocaLoop() {
-      if (!capaPlaying) return;
-      notas.forEach((freq, i) => {
-        const osc = capaAudioCtx.createOscillator();
-        const g   = capaAudioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        osc.connect(g); g.connect(capaGain);
-        g.gain.setValueAtTime(0, t + i * dur);
-        g.gain.linearRampToValueAtTime(0.6, t + i * dur + 0.05);
-        g.gain.exponentialRampToValueAtTime(0.001, t + i * dur + dur * 0.85);
-        osc.start(t + i * dur);
-        osc.stop(t + i * dur + dur);
-        capaNodes.push(osc);
-      });
-      t += notas.length * dur;
-      // Reagenda o loop antes do fim
-      const delay = (t - capaAudioCtx.currentTime) * 1000 - 200;
-      setTimeout(tocaLoop, Math.max(delay, 0));
-    }
-    tocaLoop();
-  } catch(e) {}
-}
 
 function pararMusicaCapa() {
-  if (!capaPlaying) return;
-  capaPlaying = false;
-  if (capaGain) {
-    capaGain.gain.cancelScheduledValues(capaAudioCtx.currentTime);
-    capaGain.gain.linearRampToValueAtTime(0, capaAudioCtx.currentTime + 1);
-  }
-  setTimeout(() => { capaNodes.forEach(n => { try { n.stop(); } catch(e) {} }); capaNodes = []; }, 1200);
+  const a = document.getElementById('capa-audio');
+  if (!a) return;
+  // Fade out suave via volume
+  let v = a.volume;
+  const fade = setInterval(() => {
+    v = Math.max(0, v - 0.05);
+    a.volume = v;
+    if (v <= 0) { clearInterval(fade); a.pause(); a.currentTime = 0; }
+  }, 50);
 }
 
 /* INIT */
 FA.track(FA.E.OPEN);
 verificarTTS();
 
-// Pré-aquece o AudioContext no primeiro evento de interação
-// (resolve o delay no Netlify/Chrome/Safari por política de autoplay)
-(function(){
-  const eventos = ['pointerdown','touchstart','mousedown','keydown'];
-  function preAquecer() {
-    eventos.forEach(ev => document.removeEventListener(ev, preAquecer));
-    if (!capaAudioCtx) {
-      capaAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      capaGain = capaAudioCtx.createGain();
-      capaGain.gain.value = 0;
-      capaGain.connect(capaAudioCtx.destination);
-    }
-    // Resume caso esteja suspenso (Chrome bloqueia até interação)
-    if (capaAudioCtx.state === 'suspended') capaAudioCtx.resume();
-  }
-  eventos.forEach(ev => document.addEventListener(ev, preAquecer, {once:true}));
 
-  // Ao tocar a capa especificamente: inicia a melodia imediatamente
-  document.getElementById('tela-capa').addEventListener('pointerdown', function h(){
-    this.removeEventListener('pointerdown', h);
-    if (capaAudioCtx && capaAudioCtx.state === 'suspended') {
-      capaAudioCtx.resume().then(() => tocarMusicaCapa());
-    } else {
-      tocarMusicaCapa();
-    }
-  }, {once:true});
-})();
+// Música da capa — controla via elemento <audio> nativo
+const capaAudio = document.getElementById('capa-audio');
+if (capaAudio) {
+  capaAudio.volume = 0.35;
+  // Alguns browsers ignoram autoplay — tenta play() no primeiro evento
+  const tryPlay = () => { capaAudio.play().catch(()=>{}); };
+  document.addEventListener('pointerdown', tryPlay, {once:true});
+  document.addEventListener('touchstart',  tryPlay, {once:true, passive:true});
+}
+
 
 </script>
 </body>
